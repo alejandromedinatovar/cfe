@@ -1,23 +1,19 @@
+import os
 import pandas as pd
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-#Configuración para Gunicorn
-import os
-port = int(os.environ.get("PORT", 8080))
-app.run(host="0.0.0.0", port=port)
+# Crear app con estilos Bootstrap
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server  # 👈 Para Gunicorn / Railway
 
-
-app = Dash(__name__)
-server = app.server  # 👈 necesario para Gunicorn
-
+# Cargar datos
 df = pd.read_csv("gastos_luz_espanol.csv")
 df['Fecha'] = pd.to_datetime(df['Fecha'])
 df['Mes'] = df['Fecha'].dt.to_period('M').astype(str)
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+# Layout
 app.layout = dbc.Container([
     html.H1("Dashboard de Consumo Eléctrico", className="text-center my-4"),
     dbc.Row([
@@ -59,6 +55,7 @@ app.layout = dbc.Container([
     ])
 ], fluid=True)
 
+# Callbacks
 @app.callback(
     Output('consumo-total', 'children'),
     Output('costo-total', 'children'),
@@ -106,7 +103,7 @@ def actualizar_dashboard(proveedor, start_date, end_date):
     return consumo_total, costo_total, promedio_mensual, precio_promedio, \
         fig_linea, fig_puntos, fig_barras, fig_tendencia, fig_horas, fig_pastel
 
+# Ejecutar localmente o en producción
 if __name__ == "__main__":
-    #app.run_server(debug=True, port=8051)
-    app.run(debug=True, port=8051)
-
+    port = int(os.environ.get("PORT", 8051))
+    app.run(host="0.0.0.0", port=port, debug=True)
