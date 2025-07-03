@@ -3,6 +3,15 @@ from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
+#Configuración para Gunicorn
+import os
+port = int(os.environ.get("PORT", 8080))
+app.run(host="0.0.0.0", port=port)
+
+
+app = Dash(__name__)
+server = app.server  # 👈 necesario para Gunicorn
+
 df = pd.read_csv("gastos_luz_espanol.csv")
 df['Fecha'] = pd.to_datetime(df['Fecha'])
 df['Mes'] = df['Fecha'].dt.to_period('M').astype(str)
